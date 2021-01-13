@@ -1,0 +1,8 @@
+projects:
+  xstate-demo:
+    includes:
+      - src/**/**.ts
+      - src/**/**.tsx
+      - src/**.tsx
+      - src/**.ts
+    schemaPath: src/graphql/generated/apiSchema.graphql
