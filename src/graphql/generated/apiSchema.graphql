@@ -2,10 +2,34 @@
 ### Do not make changes to this file directly
 
 type Mutation {
+  createPayment(
+    amount: Float!
+    currency: String!
+    date: String!
+    reason: String!
+    reference: String!
+  ): Payment!
   logIn(password: String!, username: String!): User!
+  validatePayment(
+    amount: Float!
+    currency: String!
+    date: String!
+    reason: String!
+    reference: String!
+  ): Boolean!
+}
+
+type Payment {
+  amount: Float!
+  currency: String!
+  date: String!
+  id: ID!
+  reason: String!
+  reference: String!
 }
 
 type Query {
+  payment(id: String!): Payment!
   user: User!
 }
 

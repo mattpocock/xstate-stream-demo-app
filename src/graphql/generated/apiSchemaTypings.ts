@@ -21,6 +21,15 @@ export interface NexusGenScalars {
 
 export interface NexusGenObjects {
   Mutation: {};
+  Payment: {
+    // root type
+    amount: number; // Float!
+    currency: string; // String!
+    date: string; // String!
+    id: string; // ID!
+    reason: string; // String!
+    reference: string; // String!
+  };
   Query: {};
   User: {
     // root type
@@ -41,10 +50,22 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars;
 export interface NexusGenFieldTypes {
   Mutation: {
     // field return type
+    createPayment: NexusGenRootTypes['Payment']; // Payment!
     logIn: NexusGenRootTypes['User']; // User!
+    validatePayment: boolean; // Boolean!
+  };
+  Payment: {
+    // field return type
+    amount: number; // Float!
+    currency: string; // String!
+    date: string; // String!
+    id: string; // ID!
+    reason: string; // String!
+    reference: string; // String!
   };
   Query: {
     // field return type
+    payment: NexusGenRootTypes['Payment']; // Payment!
     user: NexusGenRootTypes['User']; // User!
   };
   User: {
@@ -58,10 +79,22 @@ export interface NexusGenFieldTypes {
 export interface NexusGenFieldTypeNames {
   Mutation: {
     // field return type name
+    createPayment: 'Payment';
     logIn: 'User';
+    validatePayment: 'Boolean';
+  };
+  Payment: {
+    // field return type name
+    amount: 'Float';
+    currency: 'String';
+    date: 'String';
+    id: 'ID';
+    reason: 'String';
+    reference: 'String';
   };
   Query: {
     // field return type name
+    payment: 'Payment';
     user: 'User';
   };
   User: {
@@ -74,10 +107,32 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    createPayment: {
+      // args
+      amount: number; // Float!
+      currency: string; // String!
+      date: string; // String!
+      reason: string; // String!
+      reference: string; // String!
+    };
     logIn: {
       // args
       password: string; // String!
       username: string; // String!
+    };
+    validatePayment: {
+      // args
+      amount: number; // Float!
+      currency: string; // String!
+      date: string; // String!
+      reason: string; // String!
+      reference: string; // String!
+    };
+  };
+  Query: {
+    payment: {
+      // args
+      id: string; // String!
     };
   };
 }
