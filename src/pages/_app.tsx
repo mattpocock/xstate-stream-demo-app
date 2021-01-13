@@ -19,7 +19,14 @@ function MyApp({ Component, pageProps }) {
       </Head>
       <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
         <div className="flex-1">
-          <Component {...pageProps} />
+          <div className="p-4 border-t-4 border-purple-500">
+            <h1 className="font-semibold tracking-wide text-purple-900 uppercase">
+              My Payments App
+            </h1>
+          </div>
+          <div className="p-4">
+            <Component {...pageProps} />
+          </div>
         </div>
         <div className="flex flex-col items-stretch flex-1 bg-gray-200">
           <iframe
