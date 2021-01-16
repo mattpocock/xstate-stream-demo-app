@@ -9,5 +9,10 @@ export const fetchFromApi = (query: DocumentNode, variables: {}) => {
     }),
   })
     .then((res) => res.json())
-    .then((res) => res.data);
+    .then((res) => {
+      if (res.errors?.[0]?.message) {
+        throw new Error(res?.errors?.[0]?.message);
+      }
+      return res.data;
+    });
 };

@@ -1,5 +1,10 @@
 import { createMachine, assign, Sender } from "xstate";
 import { useMachine } from "@xstate/react";
+import { Input } from "../components/Input";
+import { Button } from "../components/Button";
+import { Heading } from "../components/Heading";
+import { fetchFromApi } from "../utils/fetchFromApi";
+import gql from "graphql-tag";
 // import { fetchFromApi } from "../utils/fetchFromApi";
 // import { gql } from "apollo-server-micro";
 
@@ -92,16 +97,32 @@ export const paymentWizardMachine = createMachine<Context, Event>(
         const variables = context.formValues;
 
         try {
-          setTimeout(() => {
-            callback({
-              type: "REPORT_CREATE_SUCCESS",
-            });
-          }, 800);
+          await fetchFromApi(
+            gql`
+              mutation CreatePayment(
+                $amount: Float!
+                $currency: String!
+                $date: String!
+                $reason: String!
+                $reference: String!
+              ) {
+                createPayment(
+                  amount: $amount
+                  currency: $currency
+                  date: $date
+                  reason: $reason
+                  reference: $reference
+                ) {
+                  amount
+                  id
+                }
+              }
+            `,
+            context.formValues,
+          );
+          callback("REPORT_CREATE_SUCCESS");
         } catch (e) {
-          console.error(e);
-          callback({
-            type: "REPORT_CREATE_FAILED",
-          });
+          callback("REPORT_CREATE_FAILED");
         }
       },
     },
@@ -124,36 +145,36 @@ export default function Home() {
     devTools: true,
   });
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       {state.matches("enteringDetails") && (
         <>
-          <h1>Payment Wizard</h1>
-          <input
+          <Heading>Payment Wizard</Heading>
+          <Input
             className="block max-w-xs"
             value={state.context.formValues?.currency}
-            placeholder="currency"
-          ></input>
-          <input
+            placeholder="Currency"
+          ></Input>
+          <Input
             className="block max-w-xs"
             value={state.context.formValues?.amount}
-            placeholder="amount"
-          ></input>
-          <input
+            placeholder="Amount"
+          ></Input>
+          <Input
             className="block max-w-xs"
             value={state.context.formValues?.date}
-            placeholder="date"
-          ></input>
-          <input
+            placeholder="Date"
+          ></Input>
+          <Input
             className="block max-w-xs"
             value={state.context.formValues?.reason}
-            placeholder="reason"
-          ></input>
-          <input
+            placeholder="Reason"
+          ></Input>
+          <Input
             className="block max-w-xs"
             value={state.context.formValues?.reference}
-            placeholder="reference"
-          ></input>
-          <button
+            placeholder="Reference"
+          ></Input>
+          <Button
             onClick={() => {
               send({
                 type: "CONFIRM",
@@ -168,40 +189,28 @@ export default function Home() {
             }}
           >
             Submit
-          </button>
+          </Button>
         </>
       )}
       {state.matches("confirmingPaymentDetails") && (
         <>
-          <h1>Are you sure?</h1>
+          <Heading>Are you sure?</Heading>
           <pre className="text-sm text-gray-600">
             {JSON.stringify(state.context.formValues, null, 2)}
           </pre>
-          <button
-            className="px-3 py-2 text-red-100 bg-red-600"
-            onClick={() => send("BACK")}
-          >
-            I am SO NOT ready to rumble
-          </button>
-          <button
-            className="px-3 py-2 text-white bg-purple-600"
-            onClick={() => send("SUBMIT_CREATE")}
-          >
-            I am ready to rumble
-          </button>
+          <div className="space-x-4">
+            <Button onClick={() => send("BACK")}>Go Back</Button>
+            <Button onClick={() => send("SUBMIT_CREATE")}>
+              I am ready to rumble
+            </Button>
+          </div>
         </>
       )}
       {state.matches("paymentMadeSuccessfully") && (
         <>
-          <button
-            className="px-3 py-2 text-red-100 bg-red-600"
-            onClick={() => send("GO_AGAIN")}
-          >
-            I wanna try again
-          </button>
+          <Button onClick={() => send("GO_AGAIN")}>I wanna try again</Button>
         </>
       )}
-      <pre className="pt-4">State: {JSON.stringify(state.value, null, 2)}</pre>
     </div>
   );
 }
