@@ -1,8 +1,11 @@
+import { useContext } from "react";
 import { Button } from "../components/Button";
 import { Heading } from "../components/Heading";
 import { Input } from "../components/Input";
+import { AuthStateContext } from "../machines/authState.machine";
 
 const LoginPage = () => {
+  const { handleLogin } = useContext(AuthStateContext);
   return (
     <form
       onSubmit={(e) => {
@@ -13,7 +16,7 @@ const LoginPage = () => {
       <Heading>Log In</Heading>
       <Input placeholder="Username" className="block" />
       <Input placeholder="Password" className="block" />
-      <Button>Submit</Button>
+      <Button onClick={() => handleLogin()}>Submit</Button>
     </form>
   );
 };
