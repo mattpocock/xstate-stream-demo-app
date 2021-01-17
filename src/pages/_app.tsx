@@ -19,12 +19,12 @@ function MyApp({ Component, pageProps }) {
       </Head>
       <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
         <div className="flex-1">
-          <div className="p-4 border-t-4 border-purple-500">
+          <div className="p-4 border-t-4 border-purple-500 shadow-md">
             <h1 className="font-semibold tracking-wide text-purple-900 uppercase">
               My Payments App
             </h1>
           </div>
-          <div className="p-4">
+          <div className="p-6">
             <Component {...pageProps} />
           </div>
         </div>
