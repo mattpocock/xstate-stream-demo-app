@@ -1,6 +1,6 @@
 import { gql } from "apollo-server-micro";
 import { createMachine, assign } from "@xstate/compiled";
-import { Sender } from "xstate";
+import { send, Sender } from "xstate";
 import { fetchFromApi } from "../utils/fetchFromApi";
 
 export interface PaymentWizardContext {
@@ -10,6 +10,8 @@ export interface PaymentWizardContext {
     sortCode: string;
     accountNumber: string;
   };
+  currencyAmountCache: Record<string, boolean>;
+  sortCodeAccountNumberCache: Record<string, boolean>;
 }
 
 export type PaymentWizardEvent =
@@ -35,6 +37,27 @@ export type PaymentWizardEvent =
       type: "REPORT_CREATE_SUCCESS";
     }
   | {
+      type: "ON_VALUE_CHANGE";
+      currency: string;
+      amount: string;
+      sortCode: string;
+      accountNumber: string;
+    }
+  | {
+      type: "done.invoke.checkCurrencyAndAmount";
+      data: boolean;
+    }
+  | {
+      type: "done.invoke.checkAccountAndSortCode";
+      data: boolean;
+    }
+  | {
+      type: "INPUTS_HAVE_ERRORED";
+    }
+  | {
+      type: "INPUTS_ARE_VALID";
+    }
+  | {
       type: "REPORT_CREATE_FAILED";
     };
 
@@ -47,11 +70,88 @@ export const paymentWizardMachine = createMachine<
     initial: "enteringDetails",
     states: {
       enteringDetails: {
+        // on: {
+        //   // CONFIRM: {
+        //   //   target: "confirmingPaymentDetails",
+        //   //   actions: "assignPaymentDetailsToContext",
+        //   // },
+
+        // },
+        initial: "idle",
         on: {
-          CONFIRM: {
-            target: "confirmingPaymentDetails",
-            actions: "assignPaymentDetailsToContext",
+          ON_VALUE_CHANGE: {
+            actions: ["assignFormValuesToContext"],
+            target: ".debouncing",
           },
+        },
+        states: {
+          idle: {},
+          debouncing: {
+            after: {
+              600: "checkingInputs",
+            },
+            on: {
+              ON_VALUE_CHANGE: {
+                actions: ["assignFormValuesToContext"],
+                target: "debouncing",
+              },
+            },
+          },
+          checkingInputs: {
+            on: {
+              INPUTS_HAVE_ERRORED: {
+                target: "inputsAreInvalid",
+              },
+            },
+            type: "parallel",
+            states: {
+              accountAndSortCodeCheck: {
+                initial: "pending",
+                states: {
+                  pending: {
+                    invoke: {
+                      src: "checkAccountAndSortCode",
+                      onDone: {
+                        actions: "storeAccountSortCodeResultInCache",
+                        target: "complete",
+                      },
+                      onError: {
+                        actions: [send("INPUTS_HAVE_ERRORED")],
+                      },
+                    },
+                  },
+                  complete: {
+                    type: "final",
+                  },
+                },
+              },
+              currencyAndAmountCheck: {
+                initial: "pending",
+                states: {
+                  pending: {
+                    invoke: {
+                      src: "checkCurrencyAndAmount",
+                      onDone: {
+                        actions: "storeCurrencyAndAmountResultInCache",
+                        target: "complete",
+                      },
+                      onError: {
+                        actions: [send("INPUTS_HAVE_ERRORED")],
+                      },
+                    },
+                  },
+                  complete: {
+                    type: "final",
+                  },
+                },
+              },
+            },
+            onDone: {
+              target: "inputsAreValid",
+            },
+          },
+          inputsAreInvalid: {},
+          inputsAreValid: {},
         },
       },
       confirmingPaymentDetails: {
@@ -130,16 +230,52 @@ export const paymentWizardMachine = createMachine<
           callback("REPORT_CREATE_FAILED");
         }
       },
+      checkCurrencyAndAmount: () => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(true);
+          }, 1200);
+        });
+      },
+      checkAccountAndSortCode: () => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(true);
+          }, 1600);
+        });
+      },
     },
     actions: {
-      assignPaymentDetailsToContext: assign((context, event) => {
-        if (event.type !== "CONFIRM") return {};
+      assignFormValuesToContext: assign((context, event) => {
         return {
-          formValues: event.values,
+          formValues: {
+            accountNumber: event.accountNumber,
+            amount: event.amount,
+            currency: event.currency,
+            sortCode: event.sortCode,
+          },
         };
       }),
-      resetFormDetails: assign({
-        formValues: undefined,
+      resetFormDetails: assign((context, event) => {
+        return {
+          formValues: undefined,
+        };
+      }),
+      storeAccountSortCodeResultInCache: assign((context, event) => {
+        return {
+          sortCodeAccountNumberCache: {
+            ...context.sortCodeAccountNumberCache,
+            [`${context.formValues?.sortCode}_${context.formValues?.accountNumber}`]: event.data,
+          },
+        };
+      }),
+      storeCurrencyAndAmountResultInCache: assign((context, event) => {
+        return {
+          currencyAmountCache: {
+            ...context.currencyAmountCache,
+            [`${context.formValues?.currency}_${context.formValues?.amount}`]: event.data,
+          },
+        };
       }),
     },
   },

@@ -1,9 +1,12 @@
 import { useMachine } from "@xstate/compiled/react";
+import { useEffect } from "react";
 import { Button } from "../components/Button";
 import { Heading } from "../components/Heading";
 import { Input } from "../components/Input";
 import { useMutationForm } from "../components/useMutationForm";
 import { paymentWizardMachine } from "../machines/paymentWizard.machine";
+
+export const something = "";
 
 export default function Home() {
   const [state, send] = useMachine(paymentWizardMachine, {
@@ -23,9 +26,26 @@ export default function Home() {
       accountNumber: "",
     },
     onSubmit: (values) => {
-      console.log(values);
+      send({
+        type: "CONFIRM",
+        values,
+      });
     },
   });
+
+  useEffect(() => {
+    if (
+      paymentForm.values.accountNumber ||
+      paymentForm.values.amount ||
+      paymentForm.values.currency ||
+      paymentForm.values.sortCode
+    ) {
+      send({
+        type: "ON_VALUE_CHANGE",
+        ...paymentForm.values,
+      });
+    }
+  }, [paymentForm.values]);
   return (
     <div className="space-y-4">
       {state.matches("enteringDetails") && (
