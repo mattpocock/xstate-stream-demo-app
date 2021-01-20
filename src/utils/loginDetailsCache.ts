@@ -5,7 +5,10 @@ interface JWT {
 }
 
 const getDetails = (): JWT | null => {
-  return JSON.parse(localStorage.getItem(LOGIN_KEY) || "null");
+  if (typeof window !== "undefined") {
+    return JSON.parse(localStorage.getItem(LOGIN_KEY) || "null");
+  }
+  return null;
 };
 
 const saveDetails = (jwt: JWT) => {

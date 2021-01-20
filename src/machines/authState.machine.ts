@@ -1,8 +1,7 @@
-import { createContext } from "react";
-import { createMachine } from "xstate";
+import { createMachine, interpret } from "@xstate/compiled";
 import { loginDetailsCache } from "../utils/loginDetailsCache";
 
-export const authStateMachine = createMachine(
+const authStateMachine = createMachine<any, any, "authStateMachine">(
   {
     id: "authStateMachine",
     initial: "checkingIfLoggedIn",
@@ -63,4 +62,18 @@ export const authStateMachine = createMachine(
   },
 );
 
-export const AuthStateContext = createContext<any>({});
+export const authStateService = interpret(authStateMachine).start(
+  typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("STATE"))
+    : undefined,
+);
+
+authStateService.onTransition((state) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("STATE", JSON.stringify(state));
+  }
+});
+
+export const handleLogin = () => {
+  authStateService.send("LOG_IN");
+};

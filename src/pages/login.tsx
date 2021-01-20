@@ -1,11 +1,18 @@
+import { useService } from "@xstate/react";
 import { useContext } from "react";
 import { Button } from "../components/Button";
 import { Heading } from "../components/Heading";
 import { Input } from "../components/Input";
-import { AuthStateContext } from "../machines/authState.machine";
+import { authStateService, handleLogin } from "../machines/authState.machine";
 
 const LoginPage = () => {
-  const { handleLogin } = useContext(AuthStateContext);
+  const [state, send] = useService(authStateService);
+
+  const isLoggedIn = state.matches("loggedIn");
+
+  if (isLoggedIn) {
+    return <Button onClick={() => send("LOG_OUT")}>Log Out</Button>;
+  }
   return (
     <form
       onSubmit={(e) => {
