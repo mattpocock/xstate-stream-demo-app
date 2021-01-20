@@ -13,16 +13,14 @@ export default function Home() {
   const paymentForm = useMutationForm<{
     currency: string;
     amount: string;
-    date: string;
-    reason: string;
-    reference: string;
+    sortCode: string;
+    accountNumber: string;
   }>({
     initialValues: {
       amount: "",
       currency: "",
-      date: "",
-      reason: "",
-      reference: "",
+      sortCode: "",
+      accountNumber: "",
     },
     onSubmit: (values) => {
       console.log(values);
@@ -32,48 +30,30 @@ export default function Home() {
     <div className="space-y-4">
       {state.matches("enteringDetails") && (
         <paymentForm.Provider {...paymentForm}>
-          <Heading>Payment Wizard</Heading>
-          <Input
-            className="block max-w-xs"
-            placeholder="Currency"
-            {...paymentForm.makeInputProps("currency")}
-          ></Input>
-          <Input
-            className="block max-w-xs"
-            placeholder="Amount"
-            {...paymentForm.makeInputProps("amount")}
-          ></Input>
-          <Input
-            className="block max-w-xs"
-            placeholder="Date"
-            {...paymentForm.makeInputProps("date")}
-          ></Input>
-          <Input
-            className="block max-w-xs"
-            placeholder="Reason"
-            {...paymentForm.makeInputProps("reason")}
-          ></Input>
-          <Input
-            className="block max-w-xs"
-            placeholder="Reference"
-            {...paymentForm.makeInputProps("reference")}
-          ></Input>
-          <Button
-            onClick={() => {
-              send({
-                type: "CONFIRM",
-                values: {
-                  amount: 20,
-                  currency: "EUR",
-                  date: "2018-04-02",
-                  reason: "Reason",
-                  reference: "Funky Reference",
-                },
-              });
-            }}
-          >
-            Submit
-          </Button>
+          <div className="space-y-4">
+            <Heading>Payment Wizard</Heading>
+            <Input
+              className="block max-w-xs"
+              placeholder="Currency"
+              {...paymentForm.makeInputProps("currency")}
+            ></Input>
+            <Input
+              className="block max-w-xs"
+              placeholder="Amount"
+              {...paymentForm.makeInputProps("amount")}
+            ></Input>
+            <Input
+              className="block max-w-xs"
+              placeholder="Sort Code"
+              {...paymentForm.makeInputProps("sortCode")}
+            ></Input>
+            <Input
+              className="block max-w-xs"
+              placeholder="Account Number"
+              {...paymentForm.makeInputProps("accountNumber")}
+            ></Input>
+            <Button>Submit</Button>
+          </div>
         </paymentForm.Provider>
       )}
       {state.matches("confirmingPaymentDetails") && (

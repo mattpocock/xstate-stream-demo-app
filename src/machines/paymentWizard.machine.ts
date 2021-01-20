@@ -6,10 +6,9 @@ import { fetchFromApi } from "../utils/fetchFromApi";
 export interface PaymentWizardContext {
   formValues?: {
     currency: string;
-    amount: number;
-    date: string;
-    reason: string;
-    reference: string;
+    amount: string;
+    sortCode: string;
+    accountNumber: string;
   };
 }
 
@@ -18,10 +17,9 @@ export type PaymentWizardEvent =
       type: "CONFIRM";
       values: {
         currency: string;
-        amount: number;
-        date: string;
-        reason: string;
-        reference: string;
+        amount: string;
+        sortCode: string;
+        accountNumber: string;
       };
     }
   | {
@@ -119,7 +117,13 @@ export const paymentWizardMachine = createMachine<
                 }
               }
             `,
-            context.formValues,
+            {
+              amount: context.formValues.amount,
+              currency: context.formValues.currency,
+              date: "2018-04-02",
+              reason: context.formValues.accountNumber,
+              reference: context.formValues.sortCode,
+            },
           );
           callback("REPORT_CREATE_SUCCESS");
         } catch (e) {
